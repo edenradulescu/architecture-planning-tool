@@ -55,19 +55,21 @@ export function useProjectActions() {
     if (!trimmed) return
 
     setIsLoading(true)
-    const response = await fetch("/api/projects", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: trimmed }),
-    })
-    setIsLoading(false)
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmed }),
+      })
+      if (!response.ok) return
 
-    if (!response.ok) return
-
-    const { project } = (await response.json()) as { project: { id: string } }
-    closeDialog()
-    router.push(`/editor/${project.id}`)
-    router.refresh()
+      const { project } = (await response.json()) as { project: { id: string } }
+      closeDialog()
+      router.push(`/editor/${project.id}`)
+      router.refresh()
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   async function submitRename() {
@@ -76,17 +78,19 @@ export function useProjectActions() {
     if (!trimmed) return
 
     setIsLoading(true)
-    const response = await fetch(`/api/projects/${dialog.project.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: trimmed }),
-    })
-    setIsLoading(false)
+    try {
+      const response = await fetch(`/api/projects/${dialog.project.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmed }),
+      })
+      if (!response.ok) return
 
-    if (!response.ok) return
-
-    closeDialog()
-    router.refresh()
+      closeDialog()
+      router.refresh()
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   async function submitDelete() {
@@ -94,18 +98,20 @@ export function useProjectActions() {
     const { project } = dialog
 
     setIsLoading(true)
-    const response = await fetch(`/api/projects/${project.id}`, {
-      method: "DELETE",
-    })
-    setIsLoading(false)
+    try {
+      const response = await fetch(`/api/projects/${project.id}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) return
 
-    if (!response.ok) return
-
-    closeDialog()
-    if (pathname === `/editor/${project.id}`) {
-      router.push("/editor")
-    } else {
-      router.refresh()
+      closeDialog()
+      if (pathname === `/editor/${project.id}`) {
+        router.push("/editor")
+      } else {
+        router.refresh()
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
 
