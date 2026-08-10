@@ -15,8 +15,8 @@ export async function getCurrentIdentity(): Promise<ClerkIdentity | null> {
 
   const user = await currentUser()
   const email =
-    user?.primaryEmailAddress?.emailAddress ??
-    user?.emailAddresses[0]?.emailAddress ??
+    user?.primaryEmailAddress?.emailAddress?.toLowerCase() ??
+    user?.emailAddresses[0]?.emailAddress?.toLowerCase() ??
     null
 
   return { userId, email }

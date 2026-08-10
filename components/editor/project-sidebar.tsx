@@ -1,6 +1,7 @@
 "use client"
 
 import { FolderOpen, Pencil, Plus, Trash2, X } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -50,9 +51,10 @@ function ProjectListItem({
         isActive && "border-brand/30 bg-accent-dim"
       )}
     >
-      <span
+      <Link
+        href={`/editor/${project.id}`}
         className={cn(
-          "flex min-w-0 flex-1 items-center gap-2 truncate text-sm text-copy-secondary",
+          "flex min-w-0 flex-1 items-center gap-2 truncate rounded-lg text-sm text-copy-secondary outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           isActive && "font-medium text-copy-primary"
         )}
       >
@@ -63,7 +65,7 @@ function ProjectListItem({
           />
         )}
         <span className="truncate">{project.name}</span>
-      </span>
+      </Link>
       {project.isOwner && (
         <div className="flex shrink-0 items-center gap-1">
           <Button
@@ -129,7 +131,11 @@ export function ProjectSidebar({
         </div>
 
         <Tabs
-          defaultValue="my-projects"
+          defaultValue={
+            sharedProjects.some((project) => project.id === activeProjectId)
+              ? "shared"
+              : "my-projects"
+          }
           className="flex flex-1 flex-col overflow-hidden px-4 py-3"
         >
           <TabsList className="w-full">

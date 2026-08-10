@@ -83,6 +83,7 @@ export function ShareDialog({
             <div className="flex gap-2">
               <Input
                 type="email"
+                aria-label="Collaborator email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="teammate@example.com"
@@ -139,6 +140,7 @@ export function ShareDialog({
         <div className="flex items-center gap-2 border-t border-surface-border-subtle pt-4">
           <Input
             readOnly
+            aria-label="Project link"
             value={
               typeof window !== "undefined"
                 ? `${window.location.origin}/editor/${projectId}`
