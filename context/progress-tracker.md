@@ -4,11 +4,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- 03-auth: Clerk wired end to end (provider, auth pages, route protection, user menu)
+- Feature 05 (TBD)
 
 ## Current Goal
 
-- 04-project-dialogs is complete per `context/feature-specs/04-project-dialogs.md`. Next unit is not yet chosen — see Next Up.
+- To be determined for Feature 05.
 
 ## Completed
 
@@ -37,6 +37,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - 04-project-dialogs: verified via `tsc --noEmit` (clean), `eslint .` (clean), `npm run build` (passes), and a Playwright/Chromium pass driving a temporary public route (`app/editor-preview-tmp`, plus a temporary `proxy.ts` public-route entry, both reverted/deleted after use — same pattern as the 02-editor session) — confirmed: slug preview updates live and strips punctuation/casing correctly; rename dialog prefills, autofocuses, and Enter-submits with the input's value fully replacing the old name (not appended — the first pass falsely suggested otherwise because the test script's `Ctrl+A` didn't select-all on this OS, not an app bug; re-verified with `.fill()`); delete dialog has zero inputs and a destructive-styled confirm button; rename/delete icons are present for owned projects and absent for the shared project; mobile viewport (390×844) shows the backdrop scrim and a tap on it closes the sidebar; no console errors.
 - 04-project-dialogs bugfix: the Rename dialog's input text was rendering unreadably dark (near-black on a dark surface) — user caught this from a screenshot. Root cause was in `app/globals.css`'s `@theme inline` block, predating this unit: `--color-base: var(--bg-base);` registered a Tailwind v4 color token named "base". Tailwind v4 shares one namespace across all color-utility prefixes (`bg-`, `text-`, `border-`, etc.), and "base" collides with Tailwind's own built-in font-size scale key (`--text-base: 1rem`, used by the `text-base` utility). The compiled CSS showed `.text-base { color: var(--bg-base); }` with no font-size rule at all — so every `text-base` usage in the app (in the protected `components/ui/input.tsx`, `textarea.tsx`, `card.tsx`, `dialog.tsx`, plus `components/auth/auth-layout.tsx`) had silently lost its font-size and gained an unwanted near-black text color. It was only visibly broken where nothing else overrode the color (the dialog `Input`/`DialogTitle`); in `auth-layout.tsx` an adjacent `text-copy-primary`/`text-copy-muted` class happened to win the cascade, masking the bug there.
 - Fixed at the root: renamed the token from `--color-base` to `--color-page` in `app/globals.css` (no other token collides with a built-in Tailwind scale key — verified by checking `node_modules/tailwindcss/theme.css`), which un-shadows the real `text-base` font-size utility without touching any protected `components/ui/*` file. Updated the two real `bg-base` usages (both in `components/auth/auth-layout.tsx`) to `bg-page`. `app/layout.tsx`'s Clerk theme config reads `var(--bg-base)` directly (a raw CSS var, not a Tailwind class) and was unaffected. `context/ui-context.md` updated to document `bg-page` (not `bg-base`) as the page-background utility name, with a pointer back to this note.
+- 04-project-dialogs code-review fix: `components/editor/project-dialogs.tsx`'s three `onOpenChange` handlers now skip `closeDialog()` while `isLoading` is true, so Escape/backdrop-click/the X button can no longer dismiss a dialog mid-submit. Verified via Playwright: all three dismissal paths are blocked while a mock submit is pending, the dialog still closes itself the instant the submit resolves, and normal (not-loading) dismissal is unaffected. A second reported finding — binding `submitCreate`/`submitRename`/`submitDelete` to their originating dialog so a stale completion can't mutate `projects` or call `closeDialog()` after the dialog was dismissed — was checked and found not reachable in the current code: dismissal is the only way `dialog` state could change mid-submit (every trigger button lives behind the modal dialog's backdrop, `z-40` sidebar vs. `z-50` overlay), and this fix removes that path, so no separate operation-binding was added.
+- 04-project-dialogs code-review fix: `slugify()` can return `""` for a non-empty, non-whitespace name (e.g. `"!!!"` — passes the existing `name.trim()` check but strips to nothing), which let `submitCreate`/`submitRename` in `hooks/use-project-dialogs.ts` write a `Project` with an empty `slug`. Both now also compute `slug = slugify(trimmed)` and return early when it's empty. `components/editor/project-dialogs.tsx`'s Create/Rename submit buttons now also disable on `!slugPreview` (in addition to the existing `!name.trim() || isLoading`) so the button reflects the same guard. Verified via Playwright: the Create button stays disabled for a symbol-only name and re-enables once a valid name is typed; delete has no name/slug involved and was left untouched.
 
 ## In Progress
 
@@ -44,10 +46,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Center navbar section remains empty until a future chapter defines its content (the right section is now used by `UserButton`).
-- `app/editor/page.tsx`'s center content (`EditorHome`) is a static "create or open a project" prompt with mock data behind it — the real canvas (Liveblocks + React Flow) and navigating into a selected project are separate, not-yet-started chapters.
-- Project create/rename/delete in `useProjectDialogs` operate on in-memory mock data only — wiring these to real API routes + Prisma persistence is a separate, not-yet-started chapter.
-- Choose the next feature unit from `context/project-overview.md` (project creation/ownership persistence, canvas, starter templates, AI generation, or spec generation).
+- Feature 05
 
 ## Open Questions
 

@@ -46,6 +46,8 @@ export function useProjectDialogs() {
   async function submitCreate() {
     const trimmed = name.trim()
     if (!trimmed) return
+    const slug = slugify(trimmed)
+    if (!slug) return
     setIsLoading(true)
     await mockDelay()
     setProjects((prev) => [
@@ -53,7 +55,7 @@ export function useProjectDialogs() {
       {
         id: crypto.randomUUID(),
         name: trimmed,
-        slug: slugify(trimmed),
+        slug,
         isOwner: true,
       },
     ])
@@ -65,12 +67,14 @@ export function useProjectDialogs() {
     if (dialog?.type !== "rename") return
     const trimmed = name.trim()
     if (!trimmed) return
+    const slug = slugify(trimmed)
+    if (!slug) return
     setIsLoading(true)
     await mockDelay()
     const { project } = dialog
     setProjects((prev) =>
       prev.map((p) =>
-        p.id === project.id ? { ...p, name: trimmed, slug: slugify(trimmed) } : p
+        p.id === project.id ? { ...p, name: trimmed, slug } : p
       )
     )
     setIsLoading(false)

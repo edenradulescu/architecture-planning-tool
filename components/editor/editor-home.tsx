@@ -16,7 +16,7 @@ export function EditorHome({ onCreateProject }: EditorHomeProps) {
           Create a project or open an existing one
         </h1>
         <p className="text-sm text-copy-muted">
-          Start a new architecture workspace, or choose, a project from the
+          Start a new architecture workspace, or choose a project from the
           sidebar.
         </p>
       </div>

@@ -39,7 +39,7 @@ export function ProjectDialogs({ state }: ProjectDialogsProps) {
       <Dialog
         open={dialog?.type === "create"}
         onOpenChange={(open) => {
-          if (!open) closeDialog()
+          if (!open && !isLoading) closeDialog()
         }}
       >
         <DialogContent>
@@ -72,7 +72,10 @@ export function ProjectDialogs({ state }: ProjectDialogsProps) {
               </p>
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={!name.trim() || isLoading}>
+              <Button
+                type="submit"
+                disabled={!name.trim() || !slugPreview || isLoading}
+              >
                 Create project
               </Button>
             </DialogFooter>
@@ -83,7 +86,7 @@ export function ProjectDialogs({ state }: ProjectDialogsProps) {
       <Dialog
         open={dialog?.type === "rename"}
         onOpenChange={(open) => {
-          if (!open) closeDialog()
+          if (!open && !isLoading) closeDialog()
         }}
       >
         <DialogContent>
@@ -114,7 +117,10 @@ export function ProjectDialogs({ state }: ProjectDialogsProps) {
               />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={!name.trim() || isLoading}>
+              <Button
+                type="submit"
+                disabled={!name.trim() || !slugPreview || isLoading}
+              >
                 Save
               </Button>
             </DialogFooter>
@@ -125,7 +131,7 @@ export function ProjectDialogs({ state }: ProjectDialogsProps) {
       <Dialog
         open={dialog?.type === "delete"}
         onOpenChange={(open) => {
-          if (!open) closeDialog()
+          if (!open && !isLoading) closeDialog()
         }}
       >
         <DialogContent>

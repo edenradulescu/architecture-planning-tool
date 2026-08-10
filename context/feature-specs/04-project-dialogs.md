@@ -9,7 +9,7 @@ Reuse the existing editor layout. Do not modify the navbar or sidebar behavior.
 In the center of the page, add:
 
 - heading: `Create a project or open an existing one`
-- description: `Start a new architecture workspace, or choose, a project from the sidebar.`
+- description: `Start a new architecture workspace, or choose a project from the sidebar.`
 - `New Project` button with a `Plus` icon
 
 Keep the layout minimal. Do not wrap this intent in cards.
