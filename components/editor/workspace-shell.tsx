@@ -1,8 +1,9 @@
 "use client"
 
-import { Bot, Compass, Sparkles } from "lucide-react"
+import { Bot, Sparkles } from "lucide-react"
 import { useState } from "react"
 
+import { CanvasRoom } from "@/components/editor/canvas-room"
 import { ProjectDialogs } from "@/components/editor/project-dialogs"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
 import { ShareDialog } from "@/components/editor/share-dialog"
@@ -21,38 +22,21 @@ interface WorkspaceShellProps {
   collaborators: Collaborator[]
 }
 
-function CanvasPlaceholder({ isSidebarOpen }: { isSidebarOpen: boolean }) {
+function CanvasArea({
+  roomId,
+  isSidebarOpen,
+}: {
+  roomId: string
+  isSidebarOpen: boolean
+}) {
   return (
     <div
       className={cn(
-        "relative flex flex-1 items-center justify-center overflow-hidden bg-page transition-[margin-left] duration-200 ease-out",
+        "relative flex flex-1 overflow-hidden bg-page transition-[margin-left] duration-200 ease-out",
         isSidebarOpen && "lg:ml-[19.5rem]"
       )}
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at center, var(--accent-primary-dim), transparent 70%)",
-        }}
-      />
-      <div className="relative flex max-w-xl flex-col items-center gap-4 px-4 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-brand/40 bg-elevated/80">
-          <Compass className="h-7 w-7 text-brand" />
-        </div>
-        <span className="text-xs font-medium tracking-widest text-copy-faint uppercase">
-          Workspace Shell
-        </span>
-        <h1 className="text-2xl font-semibold text-copy-primary md:text-3xl">
-          Canvas and collaboration tooling land here next.
-        </h1>
-        <p className="text-sm leading-relaxed text-copy-muted">
-          This room is ready for the shared architecture canvas, durable AI
-          workflows, and real-time presence. For now, the shell is wired with
-          project context and navigation only.
-        </p>
-      </div>
+      <CanvasRoom roomId={roomId} />
     </div>
   )
 }
@@ -132,7 +116,7 @@ export function WorkspaceShell({
         onDeleteProject={projectActions.openDeleteDialog}
       />
       <div className="flex flex-1 overflow-hidden">
-        <CanvasPlaceholder isSidebarOpen={isSidebarOpen} />
+        <CanvasArea roomId={roomId} isSidebarOpen={isSidebarOpen} />
         {isAiSidebarOpen && <AiSidebarPlaceholder />}
       </div>
       <ProjectDialogs state={projectActions} />

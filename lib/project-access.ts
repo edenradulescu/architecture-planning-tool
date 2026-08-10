@@ -7,6 +7,8 @@ import { findAccessibleProject } from "@/lib/projects"
 export interface ClerkIdentity {
   userId: string
   email: string | null
+  name: string | null
+  avatarUrl: string | null
 }
 
 export async function getCurrentIdentity(): Promise<ClerkIdentity | null> {
@@ -19,7 +21,7 @@ export async function getCurrentIdentity(): Promise<ClerkIdentity | null> {
     user?.emailAddresses[0]?.emailAddress?.toLowerCase() ??
     null
 
-  return { userId, email }
+  return { userId, email, name: user?.fullName ?? null, avatarUrl: user?.imageUrl ?? null }
 }
 
 export function checkProjectAccess(
