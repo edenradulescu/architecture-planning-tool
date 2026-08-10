@@ -26,7 +26,9 @@ All colors are defined as CSS custom properties in `globals.css` and mapped to T
 | Success          | `--state-success`      | `#34d399`                 |
 | Warning          | `--state-warning`      | `#fbbf24`                 |
 
-Tailwind utility names map to these variables. Use `bg-base`, `bg-surface`, `text-copy-primary`, `text-copy-muted`, `border-surface-border`, `text-brand`, `bg-accent-dim`, etc.
+Tailwind utility names map to these variables. Use `bg-page`, `bg-surface`, `text-copy-primary`, `text-copy-muted`, `border-surface-border`, `text-brand`, `bg-accent-dim`, etc.
+
+Note: the page-background token's Tailwind utility is named `bg-page` (not `bg-base`) — `--color-base` collided with Tailwind v4's built-in `--text-base: 1rem` font-size scale key, which silently turned every `text-base` utility in the app (used by several `components/ui/*` primitives for default font size) into `color: var(--bg-base)` instead of a font size. See the `04-project-dialogs` note in `progress-tracker.md` for details.
 
 ## Typography
 
