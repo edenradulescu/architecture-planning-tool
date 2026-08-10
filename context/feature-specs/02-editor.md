@@ -1,4 +1,4 @@
-We need the base chrome pomponents that frame every editor screen - the top navbar and the left sidebar shell. These will be reused and extended in every chapter that follows.
+We need the base chrome components that frame every editor screen - the top navbar and the left sidebar shell. These will be reused and extended in every chapter that follows.
 
 ### Editor Navbar
 
@@ -22,7 +22,7 @@ Requirements:
 - sidebar should float above the editor canvas
 - opening it should not push page content
 - slides in from the left
-- accepts `isOpen` prop
+- accepts `isOpen` prop and `onClose` props
 - header with `Projects` title + close button
 - shadcn `Tabs`:
     - My Projects
@@ -44,6 +44,6 @@ Do not build actual dialogs yet.
 
 ### Check when done
 
-- new components compile without TypeScript erros
+- new components compile without TypeScript errors
 - no lint errors
 - dialog pattern is ready for future use
