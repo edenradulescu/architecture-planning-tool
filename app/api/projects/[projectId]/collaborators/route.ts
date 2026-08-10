@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 
+import { Prisma } from "@/app/generated/prisma/client"
 import { addCollaborator, getCollaborators } from "@/lib/collaborators"
 import { checkProjectAccess, findOwnedProject, getCurrentIdentity } from "@/lib/project-access"
 import { prisma } from "@/lib/prisma"
@@ -55,6 +56,16 @@ export async function POST(
     return NextResponse.json({ error: "Already a collaborator" }, { status: 409 })
   }
 
-  const collaborator = await addCollaborator(projectId, email)
-  return NextResponse.json({ collaborator }, { status: 201 })
+  try {
+    const collaborator = await addCollaborator(projectId, email)
+    return NextResponse.json({ collaborator }, { status: 201 })
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json({ error: "Already a collaborator" }, { status: 409 })
+    }
+    throw error
+  }
 }

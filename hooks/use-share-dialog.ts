@@ -33,6 +33,8 @@ export function useShareDialog(projectId: string) {
 
       setEmail("")
       router.refresh()
+    } catch {
+      setError("Failed to invite collaborator")
     } finally {
       setIsInviting(false)
     }
@@ -40,21 +42,36 @@ export function useShareDialog(projectId: string) {
 
   async function remove(collaboratorId: string) {
     setRemovingId(collaboratorId)
+    setError(null)
     try {
-      await fetch(`/api/projects/${projectId}/collaborators/${collaboratorId}`, {
-        method: "DELETE",
-      })
+      const response = await fetch(
+        `/api/projects/${projectId}/collaborators/${collaboratorId}`,
+        { method: "DELETE" }
+      )
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+        setError(data?.error ?? "Failed to remove collaborator")
+        return
+      }
+
       router.refresh()
+    } catch {
+      setError("Failed to remove collaborator")
     } finally {
       setRemovingId(null)
     }
   }
 
-  function copyLink() {
+  async function copyLink() {
     const url = `${window.location.origin}/editor/${projectId}`
-    navigator.clipboard.writeText(url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError("Failed to copy link")
+    }
   }
 
   return {
