@@ -3,12 +3,11 @@
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { useEditorProjectActions } from "@/components/editor/editor-shell"
 
-interface EditorHomeProps {
-  onCreateProject: () => void
-}
+export function EditorHome() {
+  const { openCreateDialog } = useEditorProjectActions()
 
-export function EditorHome({ onCreateProject }: EditorHomeProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
       <div className="flex flex-col gap-1.5">
@@ -20,7 +19,7 @@ export function EditorHome({ onCreateProject }: EditorHomeProps) {
           sidebar.
         </p>
       </div>
-      <Button size="lg" onClick={onCreateProject}>
+      <Button size="lg" onClick={openCreateDialog}>
         <Plus />
         New Project
       </Button>

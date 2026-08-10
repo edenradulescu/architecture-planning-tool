@@ -1,8 +1,8 @@
 "use client"
 
+import { usePathname, useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
-import { MOCK_PROJECTS } from "@/lib/mock-projects"
 import { slugify } from "@/lib/slug"
 import type { Project } from "@/types/project"
 
@@ -12,20 +12,27 @@ type DialogState =
   | { type: "delete"; project: Project }
   | null
 
-function mockDelay() {
-  return new Promise((resolve) => setTimeout(resolve, 400))
+function generateShortSuffix(): string {
+  return crypto.randomUUID().slice(0, 6)
 }
 
-export function useProjectDialogs() {
-  const [projects, setProjects] = useState<Project[]>(MOCK_PROJECTS)
+export function useProjectActions() {
+  const router = useRouter()
+  const pathname = usePathname()
+
   const [dialog, setDialog] = useState<DialogState>(null)
   const [name, setName] = useState("")
+  const [roomSuffix, setRoomSuffix] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  const slugPreview = useMemo(() => slugify(name), [name])
+  const roomIdPreview = useMemo(() => {
+    const slug = slugify(name)
+    return slug ? `${slug}-${roomSuffix}` : ""
+  }, [name, roomSuffix])
 
   function openCreateDialog() {
     setName("")
+    setRoomSuffix(generateShortSuffix())
     setDialog({ type: "create" })
   }
 
@@ -46,57 +53,67 @@ export function useProjectDialogs() {
   async function submitCreate() {
     const trimmed = name.trim()
     if (!trimmed) return
-    const slug = slugify(trimmed)
-    if (!slug) return
+
     setIsLoading(true)
-    await mockDelay()
-    setProjects((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        name: trimmed,
-        slug,
-        isOwner: true,
-      },
-    ])
+    const response = await fetch("/api/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: trimmed }),
+    })
     setIsLoading(false)
+
+    if (!response.ok) return
+
+    const { project } = (await response.json()) as { project: { id: string } }
     closeDialog()
+    router.push(`/editor/${project.id}`)
+    router.refresh()
   }
 
   async function submitRename() {
     if (dialog?.type !== "rename") return
     const trimmed = name.trim()
     if (!trimmed) return
-    const slug = slugify(trimmed)
-    if (!slug) return
+
     setIsLoading(true)
-    await mockDelay()
-    const { project } = dialog
-    setProjects((prev) =>
-      prev.map((p) =>
-        p.id === project.id ? { ...p, name: trimmed, slug } : p
-      )
-    )
+    const response = await fetch(`/api/projects/${dialog.project.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: trimmed }),
+    })
     setIsLoading(false)
+
+    if (!response.ok) return
+
     closeDialog()
+    router.refresh()
   }
 
   async function submitDelete() {
     if (dialog?.type !== "delete") return
-    setIsLoading(true)
-    await mockDelay()
     const { project } = dialog
-    setProjects((prev) => prev.filter((p) => p.id !== project.id))
+
+    setIsLoading(true)
+    const response = await fetch(`/api/projects/${project.id}`, {
+      method: "DELETE",
+    })
     setIsLoading(false)
+
+    if (!response.ok) return
+
     closeDialog()
+    if (pathname === `/editor/${project.id}`) {
+      router.push("/editor")
+    } else {
+      router.refresh()
+    }
   }
 
   return {
-    projects,
     dialog,
     name,
     setName,
-    slugPreview,
+    roomIdPreview,
     isLoading,
     openCreateDialog,
     openRenameDialog,
@@ -108,4 +125,4 @@ export function useProjectDialogs() {
   }
 }
 
-export type UseProjectDialogsReturn = ReturnType<typeof useProjectDialogs>
+export type UseProjectActionsReturn = ReturnType<typeof useProjectActions>
