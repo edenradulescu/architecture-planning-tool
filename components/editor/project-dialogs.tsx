@@ -12,10 +12,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import type { UseProjectDialogsReturn } from "@/hooks/use-project-dialogs"
+import type { UseProjectActionsReturn } from "@/hooks/use-project-actions"
 
 interface ProjectDialogsProps {
-  state: UseProjectDialogsReturn
+  state: UseProjectActionsReturn
 }
 
 export function ProjectDialogs({ state }: ProjectDialogsProps) {
@@ -23,7 +23,7 @@ export function ProjectDialogs({ state }: ProjectDialogsProps) {
     dialog,
     name,
     setName,
-    slugPreview,
+    roomIdPreview,
     isLoading,
     closeDialog,
     submitCreate,
@@ -68,13 +68,13 @@ export function ProjectDialogs({ state }: ProjectDialogsProps) {
                 placeholder="My project"
               />
               <p className="text-sm text-copy-faint">
-                {slugPreview || "your-project-slug"}
+                Room ID: {roomIdPreview || "your-room-id"}
               </p>
             </div>
             <DialogFooter>
               <Button
                 type="submit"
-                disabled={!name.trim() || !slugPreview || isLoading}
+                disabled={!name.trim() || !roomIdPreview || isLoading}
               >
                 Create project
               </Button>
@@ -117,10 +117,7 @@ export function ProjectDialogs({ state }: ProjectDialogsProps) {
               />
             </div>
             <DialogFooter>
-              <Button
-                type="submit"
-                disabled={!name.trim() || !slugPreview || isLoading}
-              >
+              <Button type="submit" disabled={!name.trim() || isLoading}>
                 Save
               </Button>
             </DialogFooter>
