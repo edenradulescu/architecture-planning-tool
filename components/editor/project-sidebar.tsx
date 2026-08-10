@@ -20,6 +20,7 @@ interface ProjectSidebarProps {
   onCreateProject: () => void
   onRenameProject: (project: Project) => void
   onDeleteProject: (project: Project) => void
+  activeProjectId?: string
 }
 
 function EmptyProjectsState({ message }: { message: string }) {
@@ -33,17 +34,35 @@ function EmptyProjectsState({ message }: { message: string }) {
 
 function ProjectListItem({
   project,
+  isActive,
   onRename,
   onDelete,
 }: {
   project: Project
+  isActive?: boolean
   onRename?: (project: Project) => void
   onDelete?: (project: Project) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 hover:bg-subtle">
-      <span className="min-w-0 flex-1 truncate text-sm text-copy-secondary">
-        {project.name}
+    <div
+      className={cn(
+        "flex items-center justify-between gap-2 rounded-xl border border-transparent px-2.5 py-2 hover:bg-subtle",
+        isActive && "border-brand/30 bg-accent-dim"
+      )}
+    >
+      <span
+        className={cn(
+          "flex min-w-0 flex-1 items-center gap-2 truncate text-sm text-copy-secondary",
+          isActive && "font-medium text-copy-primary"
+        )}
+      >
+        {isActive && (
+          <span
+            aria-hidden="true"
+            className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
+          />
+        )}
+        <span className="truncate">{project.name}</span>
       </span>
       {project.isOwner && (
         <div className="flex shrink-0 items-center gap-1">
@@ -77,6 +96,7 @@ export function ProjectSidebar({
   onCreateProject,
   onRenameProject,
   onDeleteProject,
+  activeProjectId,
 }: ProjectSidebarProps) {
   return (
     <>
@@ -134,6 +154,7 @@ export function ProjectSidebar({
                   <ProjectListItem
                     key={project.id}
                     project={project}
+                    isActive={project.id === activeProjectId}
                     onRename={onRenameProject}
                     onDelete={onDeleteProject}
                   />
@@ -152,7 +173,11 @@ export function ProjectSidebar({
             ) : (
               <div className="flex flex-col gap-1 py-1">
                 {sharedProjects.map((project) => (
-                  <ProjectListItem key={project.id} project={project} />
+                  <ProjectListItem
+                    key={project.id}
+                    project={project}
+                    isActive={project.id === activeProjectId}
+                  />
                 ))}
               </div>
             )}
@@ -160,7 +185,11 @@ export function ProjectSidebar({
         </Tabs>
 
         <div className="shrink-0 border-t border-surface-border-subtle p-4">
-          <Button size="lg" className="w-full" onClick={onCreateProject}>
+          <Button
+            size="lg"
+            className="w-full rounded-full bg-brand text-page hover:bg-brand/90"
+            onClick={onCreateProject}
+          >
             <Plus />
             New Project
           </Button>
