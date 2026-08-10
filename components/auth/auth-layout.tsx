@@ -34,7 +34,7 @@ const FEATURES: Feature[] = [
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="flex min-h-svh w-full bg-base">
+    <div className="flex min-h-svh w-full bg-page">
       <div className="hidden w-1/2 flex-col justify-between bg-surface px-16 py-12 lg:flex">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-brand" />
@@ -78,7 +78,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         </p>
       </div>
 
-      <div className="flex w-full flex-1 items-center justify-center bg-base px-6 lg:w-1/2">
+      <div className="flex w-full flex-1 items-center justify-center bg-page px-6 lg:w-1/2">
         {children}
       </div>
     </div>
