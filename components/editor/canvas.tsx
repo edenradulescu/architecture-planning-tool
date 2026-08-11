@@ -2,8 +2,8 @@
 
 import "@xyflow/react/dist/style.css"
 
-import { useCallback, useRef } from "react"
-import type { DragEvent } from "react"
+import { useCallback, useEffect, useRef } from "react"
+import type { DragEvent, MouseEvent as ReactMouseEvent } from "react"
 import {
   Background,
   BackgroundVariant,
@@ -21,14 +21,17 @@ import type {
   NodeTypes,
 } from "@xyflow/react"
 import { useLiveblocksFlow } from "@liveblocks/react-flow"
-import { useRedo, useUndo } from "@liveblocks/react/suspense"
+import { useRedo, useUndo, useUpdateMyPresence } from "@liveblocks/react/suspense"
 
 import { CanvasControlBar } from "@/components/editor/canvas-control-bar"
 import { CanvasEdgeRenderer } from "@/components/editor/canvas-edge"
 import { CanvasNodeRenderer } from "@/components/editor/canvas-node"
+import { PresenceAvatars } from "@/components/editor/presence-avatars"
+import { PresenceCursors } from "@/components/editor/presence-cursors"
 import { ShapeToolbar } from "@/components/editor/shape-toolbar"
 import { StarterTemplatesModal } from "@/components/editor/starter-templates-modal"
 import type { CanvasTemplate } from "@/components/editor/starter-templates"
+import { useCanvasAutosave } from "@/hooks/use-canvas-autosave"
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
 import {
   DEFAULT_NODE_COLOR,
@@ -37,6 +40,7 @@ import {
   SHAPE_DRAG_MIME_TYPE,
   type CanvasEdge,
   type CanvasNode,
+  type CanvasSaveStatus,
   type ShapeDragPayload,
 } from "@/types/canvas"
 
@@ -75,11 +79,18 @@ function getBoundingBox(nodesToMeasure: CanvasNode[]) {
 }
 
 interface FlowCanvasProps {
+  roomId: string
   isTemplatesModalOpen: boolean
   onTemplatesModalOpenChange: (open: boolean) => void
+  onSaveStatusChange: (status: CanvasSaveStatus) => void
 }
 
-function FlowCanvas({ isTemplatesModalOpen, onTemplatesModalOpenChange }: FlowCanvasProps) {
+function FlowCanvas({
+  roomId,
+  isTemplatesModalOpen,
+  onTemplatesModalOpenChange,
+  onSaveStatusChange,
+}: FlowCanvasProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
     useLiveblocksFlow<CanvasNode, CanvasEdge>({
       suspense: true,
@@ -91,6 +102,62 @@ function FlowCanvas({ isTemplatesModalOpen, onTemplatesModalOpenChange }: FlowCa
   const undo = useUndo()
   const redo = useRedo()
   useKeyboardShortcuts({ reactFlowInstance, undo, redo })
+  const updateMyPresence = useUpdateMyPresence()
+
+  // Loads the project's last-saved canvas exactly once, and only if the
+  // Liveblocks room is genuinely empty at that moment — a room that already
+  // has nodes/edges (from another collaborator, or from this same load
+  // already having run) is never overwritten.
+  const hasAttemptedLoadRef = useRef(false)
+
+  useEffect(() => {
+    if (hasAttemptedLoadRef.current) return
+    hasAttemptedLoadRef.current = true
+
+    if (nodes.length > 0 || edges.length > 0) return
+
+    let cancelled = false
+
+    fetch(`/api/projects/${roomId}/canvas`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { canvas: { nodes: CanvasNode[]; edges: CanvasEdge[] } | null } | null) => {
+        if (cancelled || !data?.canvas) return
+
+        onNodesChange(
+          data.canvas.nodes.map((item): NodeChange<CanvasNode> => ({ type: "add", item }))
+        )
+        onEdgesChange(
+          data.canvas.edges.map((item): EdgeChange<CanvasEdge> => ({ type: "add", item }))
+        )
+      })
+      .catch(() => {
+        // Loading a saved canvas is best-effort — the room simply starts empty.
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // Intentionally runs once per room mount — hasAttemptedLoadRef guards
+    // against re-running as nodes/edges change after the load itself lands.
+  }, [roomId, nodes.length, edges.length, onNodesChange, onEdgesChange])
+
+  const saveStatus = useCanvasAutosave(roomId, nodes, edges)
+  useEffect(() => {
+    onSaveStatusChange(saveStatus)
+  }, [saveStatus, onSaveStatusChange])
+
+  const handlePaneMouseMove = useCallback(
+    (event: ReactMouseEvent) => {
+      updateMyPresence({
+        cursor: screenToFlowPosition({ x: event.clientX, y: event.clientY }),
+      })
+    },
+    [updateMyPresence, screenToFlowPosition]
+  )
+
+  const handlePaneMouseLeave = useCallback(() => {
+    updateMyPresence({ cursor: null })
+  }, [updateMyPresence])
   // Liveblocks keys added nodes by this ID in a shared LiveMap (see
   // useLiveblocksFlow's onNodesChange -> applyNodeChanges "add" case): a
   // colliding ID from a different client reconciles into the existing node
@@ -114,10 +181,22 @@ function FlowCanvas({ isTemplatesModalOpen, onTemplatesModalOpenChange }: FlowCa
       event.preventDefault()
 
       const payload = JSON.parse(raw) as ShapeDragPayload
-      const position = screenToFlowPosition({
+      // screenToFlowPosition converts the cursor's screen point (already
+      // accounting for the canvas container's bounding rect and the current
+      // pan/zoom) into a flow-space point under the cursor. A node's
+      // `position` is its top-left corner, not its center, and the drag
+      // preview (ShapeToolbar's setDragImage) is centered on the cursor
+      // regardless of where within the source button it was grabbed — so
+      // the node must be shifted up-and-left by half its own size for its
+      // center, not its corner, to land under the cursor on drop.
+      const cursorFlowPosition = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       })
+      const position = {
+        x: cursorFlowPosition.x - payload.width / 2,
+        y: cursorFlowPosition.y - payload.height / 2,
+      }
       if (nodeCounterRef.current === null) {
         nodeCounterRef.current = Math.floor(Math.random() * 1_000_000)
       }
@@ -208,6 +287,8 @@ function FlowCanvas({ isTemplatesModalOpen, onTemplatesModalOpenChange }: FlowCa
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onDelete={onDelete}
+        onPaneMouseMove={handlePaneMouseMove}
+        onPaneMouseLeave={handlePaneMouseLeave}
         connectionMode={ConnectionMode.Loose}
         fitView
       >
@@ -215,6 +296,8 @@ function FlowCanvas({ isTemplatesModalOpen, onTemplatesModalOpenChange }: FlowCa
       </ReactFlow>
       <ShapeToolbar />
       <CanvasControlBar />
+      <PresenceAvatars />
+      <PresenceCursors />
       <StarterTemplatesModal
         open={isTemplatesModalOpen}
         onOpenChange={onTemplatesModalOpenChange}
@@ -225,16 +308,25 @@ function FlowCanvas({ isTemplatesModalOpen, onTemplatesModalOpenChange }: FlowCa
 }
 
 interface CanvasProps {
+  roomId: string
   isTemplatesModalOpen: boolean
   onTemplatesModalOpenChange: (open: boolean) => void
+  onSaveStatusChange: (status: CanvasSaveStatus) => void
 }
 
-export function Canvas({ isTemplatesModalOpen, onTemplatesModalOpenChange }: CanvasProps) {
+export function Canvas({
+  roomId,
+  isTemplatesModalOpen,
+  onTemplatesModalOpenChange,
+  onSaveStatusChange,
+}: CanvasProps) {
   return (
     <ReactFlowProvider>
       <FlowCanvas
+        roomId={roomId}
         isTemplatesModalOpen={isTemplatesModalOpen}
         onTemplatesModalOpenChange={onTemplatesModalOpenChange}
+        onSaveStatusChange={onSaveStatusChange}
       />
     </ReactFlowProvider>
   )
