@@ -168,7 +168,7 @@ function FlowCanvas({ isTemplatesModalOpen, onTemplatesModalOpenChange }: FlowCa
             }
           : { x: 0, y: 0 }
 
-      const importId = `${template.id}-${Date.now()}`
+      const importId = `${template.id}-${crypto.randomUUID()}`
       const idMap = new Map(clonedNodes.map((node) => [node.id, `${importId}-${node.id}`]))
 
       const newNodes: CanvasNode[] = clonedNodes.map((node) => ({

@@ -101,7 +101,7 @@ export function CanvasEdgeRenderer({
             transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
             pointerEvents: "all",
           }}
-          onDoubleClick={startEditing}
+          onDoubleClick={isEditing ? undefined : startEditing}
         >
           {isEditing ? (
             <input

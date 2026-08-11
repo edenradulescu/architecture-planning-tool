@@ -236,6 +236,7 @@ export function CanvasNodeRenderer({ id, data, selected }: NodeProps<CanvasNode>
   const resizer = (
     <NodeResizer
       isVisible={selected}
+      keepAspectRatio={data.shape === "circle"}
       minWidth={NODE_MIN_SIZE.width}
       minHeight={NODE_MIN_SIZE.height}
       handleStyle={{
