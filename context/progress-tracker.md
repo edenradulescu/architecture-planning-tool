@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- To be determined for the next feature unit. Feature 18 added a predefined starter-template library and an import flow that replaces the active canvas — still no AI-driven node generation, no edge label collaborative-cursor/presence UI, no custom/user-saved templates.
+- To be determined for the next feature unit. Feature 18 added a predefined starter-template library and an import flow that adds a template's nodes/edges alongside the active canvas's existing content, preserving it — still no AI-driven node generation, no edge label collaborative-cursor/presence UI, no custom/user-saved templates.
 
 ## Completed
 
