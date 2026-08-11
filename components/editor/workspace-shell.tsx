@@ -25,9 +25,13 @@ interface WorkspaceShellProps {
 function CanvasArea({
   roomId,
   isSidebarOpen,
+  isTemplatesModalOpen,
+  onTemplatesModalOpenChange,
 }: {
   roomId: string
   isSidebarOpen: boolean
+  isTemplatesModalOpen: boolean
+  onTemplatesModalOpenChange: (open: boolean) => void
 }) {
   return (
     <div
@@ -36,7 +40,11 @@ function CanvasArea({
         isSidebarOpen && "lg:ml-[19.5rem]"
       )}
     >
-      <CanvasRoom roomId={roomId} />
+      <CanvasRoom
+        roomId={roomId}
+        isTemplatesModalOpen={isTemplatesModalOpen}
+        onTemplatesModalOpenChange={onTemplatesModalOpenChange}
+      />
     </div>
   )
 }
@@ -93,6 +101,7 @@ export function WorkspaceShell({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false)
   const projectActions = useProjectActions()
 
   return (
@@ -104,6 +113,7 @@ export function WorkspaceShell({
         isAiSidebarOpen={isAiSidebarOpen}
         onToggleAiSidebar={() => setIsAiSidebarOpen((open) => !open)}
         onOpenShare={() => setIsShareDialogOpen(true)}
+        onOpenTemplates={() => setIsTemplatesModalOpen(true)}
       />
       <ProjectSidebar
         isOpen={isSidebarOpen}
@@ -116,7 +126,12 @@ export function WorkspaceShell({
         onDeleteProject={projectActions.openDeleteDialog}
       />
       <div className="flex flex-1 overflow-hidden">
-        <CanvasArea roomId={roomId} isSidebarOpen={isSidebarOpen} />
+        <CanvasArea
+          roomId={roomId}
+          isSidebarOpen={isSidebarOpen}
+          isTemplatesModalOpen={isTemplatesModalOpen}
+          onTemplatesModalOpenChange={setIsTemplatesModalOpen}
+        />
         {isAiSidebarOpen && <AiSidebarPlaceholder />}
       </div>
       <ProjectDialogs state={projectActions} />

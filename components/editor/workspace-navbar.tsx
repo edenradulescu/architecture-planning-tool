@@ -2,6 +2,7 @@
 
 import { UserButton } from "@clerk/nextjs"
 import {
+  LayoutTemplate,
   PanelLeftClose,
   PanelLeftOpen,
   Share2,
@@ -18,6 +19,7 @@ interface WorkspaceNavbarProps {
   isAiSidebarOpen: boolean
   onToggleAiSidebar: () => void
   onOpenShare: () => void
+  onOpenTemplates: () => void
 }
 
 export function WorkspaceNavbar({
@@ -27,6 +29,7 @@ export function WorkspaceNavbar({
   isAiSidebarOpen,
   onToggleAiSidebar,
   onOpenShare,
+  onOpenTemplates,
 }: WorkspaceNavbarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-surface-border-subtle bg-surface px-3">
@@ -47,6 +50,16 @@ export function WorkspaceNavbar({
         </div>
       </div>
       <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onOpenTemplates}
+          className="gap-1.5 rounded-full border border-surface-border-subtle px-3 text-copy-secondary"
+          aria-label="Starter templates"
+        >
+          <LayoutTemplate />
+          Templates
+        </Button>
         <Button
           variant="ghost"
           size="sm"
