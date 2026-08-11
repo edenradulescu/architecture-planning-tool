@@ -13,6 +13,8 @@ import { Canvas } from "@/components/editor/canvas"
 
 interface CanvasRoomProps {
   roomId: string
+  isTemplatesModalOpen: boolean
+  onTemplatesModalOpenChange: (open: boolean) => void
 }
 
 function CanvasLoading() {
@@ -49,7 +51,11 @@ function RoomConnectionGuard({ children }: { children: React.ReactNode }) {
   return children
 }
 
-export function CanvasRoom({ roomId }: CanvasRoomProps) {
+export function CanvasRoom({
+  roomId,
+  isTemplatesModalOpen,
+  onTemplatesModalOpenChange,
+}: CanvasRoomProps) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider
@@ -59,7 +65,10 @@ export function CanvasRoom({ roomId }: CanvasRoomProps) {
         <RoomConnectionGuard>
           <ErrorBoundary fallback={<CanvasConnectionError />}>
             <ClientSideSuspense fallback={<CanvasLoading />}>
-              <Canvas />
+              <Canvas
+                isTemplatesModalOpen={isTemplatesModalOpen}
+                onTemplatesModalOpenChange={onTemplatesModalOpenChange}
+              />
             </ClientSideSuspense>
           </ErrorBoundary>
         </RoomConnectionGuard>
