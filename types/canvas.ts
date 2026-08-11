@@ -52,6 +52,8 @@ export type CanvasEdgeData = {
 export type CanvasNode = Node<CanvasNodeData, "canvasNode">
 export type CanvasEdge = Edge<CanvasEdgeData, "canvasEdge">
 
+export type CanvasSaveStatus = "idle" | "saving" | "saved" | "error"
+
 // Per ui-context.md's "Edge Style" section — the single source of truth for
 // the custom edge renderer's default stroke, reused by both the initial
 // `defaultEdgeOptions` on <ReactFlow> and CanvasEdgeRenderer's fallback.

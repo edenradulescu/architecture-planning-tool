@@ -1,8 +1,8 @@
 "use client"
 
-import { Bot, Sparkles } from "lucide-react"
 import { useState } from "react"
 
+import { AiSidebar } from "@/components/editor/ai-sidebar"
 import { CanvasRoom } from "@/components/editor/canvas-room"
 import { ProjectDialogs } from "@/components/editor/project-dialogs"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
@@ -10,6 +10,7 @@ import { ShareDialog } from "@/components/editor/share-dialog"
 import { WorkspaceNavbar } from "@/components/editor/workspace-navbar"
 import { useProjectActions } from "@/hooks/use-project-actions"
 import { cn } from "@/lib/utils"
+import type { CanvasSaveStatus } from "@/types/canvas"
 import type { Collaborator } from "@/types/collaborator"
 import type { Project } from "@/types/project"
 
@@ -27,11 +28,13 @@ function CanvasArea({
   isSidebarOpen,
   isTemplatesModalOpen,
   onTemplatesModalOpenChange,
+  onSaveStatusChange,
 }: {
   roomId: string
   isSidebarOpen: boolean
   isTemplatesModalOpen: boolean
   onTemplatesModalOpenChange: (open: boolean) => void
+  onSaveStatusChange: (status: CanvasSaveStatus) => void
 }) {
   return (
     <div
@@ -44,49 +47,9 @@ function CanvasArea({
         roomId={roomId}
         isTemplatesModalOpen={isTemplatesModalOpen}
         onTemplatesModalOpenChange={onTemplatesModalOpenChange}
+        onSaveStatusChange={onSaveStatusChange}
       />
     </div>
-  )
-}
-
-function AiSidebarPlaceholder() {
-  return (
-    <aside className="flex w-80 shrink-0 flex-col gap-4 border-l border-surface-border-subtle bg-surface p-4">
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col">
-          <h2 className="text-sm font-semibold text-copy-primary">
-            AI Copilot
-          </h2>
-          <p className="text-xs text-copy-muted">Placeholder panel</p>
-        </div>
-        <Sparkles className="h-4 w-4 text-ai-text" />
-      </div>
-
-      <div className="flex gap-3 rounded-2xl border border-surface-border-subtle bg-elevated p-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ai/20">
-          <Bot className="h-4 w-4 text-ai-text" />
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-copy-primary">
-            Chat surface pending
-          </span>
-          <p className="text-xs leading-relaxed text-copy-muted">
-            The toggle is wired. Messaging and generation are intentionally
-            out of scope here.
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-auto flex flex-col gap-1.5 rounded-2xl border border-surface-border-subtle bg-elevated p-3">
-        <span className="text-xs font-medium tracking-widest text-copy-faint uppercase">
-          Future Hooks
-        </span>
-        <p className="text-xs leading-relaxed text-copy-muted">
-          Prompt composer, run status, and architecture guidance will attach
-          to this sidebar.
-        </p>
-      </div>
-    </aside>
   )
 }
 
@@ -102,6 +65,7 @@ export function WorkspaceShell({
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
   const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<CanvasSaveStatus>("idle")
   const projectActions = useProjectActions()
 
   return (
@@ -114,6 +78,7 @@ export function WorkspaceShell({
         onToggleAiSidebar={() => setIsAiSidebarOpen((open) => !open)}
         onOpenShare={() => setIsShareDialogOpen(true)}
         onOpenTemplates={() => setIsTemplatesModalOpen(true)}
+        saveStatus={saveStatus}
       />
       <ProjectSidebar
         isOpen={isSidebarOpen}
@@ -131,9 +96,13 @@ export function WorkspaceShell({
           isSidebarOpen={isSidebarOpen}
           isTemplatesModalOpen={isTemplatesModalOpen}
           onTemplatesModalOpenChange={setIsTemplatesModalOpen}
+          onSaveStatusChange={setSaveStatus}
         />
-        {isAiSidebarOpen && <AiSidebarPlaceholder />}
       </div>
+      <AiSidebar
+        isOpen={isAiSidebarOpen}
+        onClose={() => setIsAiSidebarOpen(false)}
+      />
       <ProjectDialogs state={projectActions} />
       <ShareDialog
         open={isShareDialogOpen}

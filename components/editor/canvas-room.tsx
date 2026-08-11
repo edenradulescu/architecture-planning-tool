@@ -10,11 +10,13 @@ import {
 import { ErrorBoundary } from "react-error-boundary"
 
 import { Canvas } from "@/components/editor/canvas"
+import type { CanvasSaveStatus } from "@/types/canvas"
 
 interface CanvasRoomProps {
   roomId: string
   isTemplatesModalOpen: boolean
   onTemplatesModalOpenChange: (open: boolean) => void
+  onSaveStatusChange: (status: CanvasSaveStatus) => void
 }
 
 function CanvasLoading() {
@@ -55,19 +57,22 @@ export function CanvasRoom({
   roomId,
   isTemplatesModalOpen,
   onTemplatesModalOpenChange,
+  onSaveStatusChange,
 }: CanvasRoomProps) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider
         id={roomId}
-        initialPresence={{ cursor: null, isThinking: false }}
+        initialPresence={{ cursor: null, thinking: false }}
       >
         <RoomConnectionGuard>
           <ErrorBoundary fallback={<CanvasConnectionError />}>
             <ClientSideSuspense fallback={<CanvasLoading />}>
               <Canvas
+                roomId={roomId}
                 isTemplatesModalOpen={isTemplatesModalOpen}
                 onTemplatesModalOpenChange={onTemplatesModalOpenChange}
+                onSaveStatusChange={onSaveStatusChange}
               />
             </ClientSideSuspense>
           </ErrorBoundary>

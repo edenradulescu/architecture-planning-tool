@@ -2,7 +2,10 @@
 
 import { UserButton } from "@clerk/nextjs"
 import {
+  Check,
+  CircleAlert,
   LayoutTemplate,
+  Loader2,
   PanelLeftClose,
   PanelLeftOpen,
   Share2,
@@ -11,6 +14,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import type { CanvasSaveStatus } from "@/types/canvas"
 
 interface WorkspaceNavbarProps {
   projectName: string
@@ -20,6 +24,34 @@ interface WorkspaceNavbarProps {
   onToggleAiSidebar: () => void
   onOpenShare: () => void
   onOpenTemplates: () => void
+  saveStatus: CanvasSaveStatus
+}
+
+const SAVE_STATUS_CONFIG: Record<
+  Exclude<CanvasSaveStatus, "idle">,
+  { label: string; icon: typeof Loader2; className: string }
+> = {
+  saving: { label: "Saving…", icon: Loader2, className: "text-copy-muted" },
+  saved: { label: "Saved", icon: Check, className: "text-success" },
+  error: { label: "Save failed", icon: CircleAlert, className: "text-error" },
+}
+
+function SaveStatusIndicator({ status }: { status: CanvasSaveStatus }) {
+  if (status === "idle") return null
+
+  const { label, icon: Icon, className } = SAVE_STATUS_CONFIG[status]
+
+  return (
+    <span
+      className={cn(
+        "flex items-center gap-1.5 rounded-full border border-surface-border-subtle px-3 py-1 text-xs font-medium",
+        className
+      )}
+    >
+      <Icon className={cn("size-3.5", status === "saving" && "animate-spin")} />
+      {label}
+    </span>
+  )
 }
 
 export function WorkspaceNavbar({
@@ -30,6 +62,7 @@ export function WorkspaceNavbar({
   onToggleAiSidebar,
   onOpenShare,
   onOpenTemplates,
+  saveStatus,
 }: WorkspaceNavbarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-surface-border-subtle bg-surface px-3">
@@ -50,6 +83,7 @@ export function WorkspaceNavbar({
         </div>
       </div>
       <div className="flex items-center gap-2">
+        <SaveStatusIndicator status={saveStatus} />
         <Button
           variant="ghost"
           size="sm"
