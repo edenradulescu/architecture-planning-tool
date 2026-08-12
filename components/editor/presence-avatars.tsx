@@ -15,15 +15,17 @@ function CollaboratorAvatar({
   name,
   avatar,
   color,
+  thinking,
 }: {
   name: string
   avatar: string
   color: string
+  thinking: boolean
 }) {
   return (
     <div
-      title={name}
-      className={`flex ${AVATAR_SIZE_CLASS} shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-elevated`}
+      title={thinking ? `${name} · thinking…` : name}
+      className={`relative flex ${AVATAR_SIZE_CLASS} shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-elevated`}
       style={{ backgroundColor: avatar ? undefined : color }}
     >
       {avatar ? (
@@ -33,6 +35,9 @@ function CollaboratorAvatar({
         <span className="text-[11px] font-semibold text-page">
           {initials(name)}
         </span>
+      )}
+      {thinking && (
+        <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 animate-pulse rounded-full bg-ai ring-2 ring-elevated" />
       )}
     </div>
   )
@@ -57,6 +62,7 @@ export function PresenceAvatars() {
               name={other.info?.name ?? "Guest"}
               avatar={other.info?.avatar ?? ""}
               color={other.info?.color ?? "#f8fafc"}
+              thinking={other.presence.thinking}
             />
           ))}
           {overflowCount > 0 && (

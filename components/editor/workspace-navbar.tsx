@@ -12,6 +12,8 @@ import {
   Sparkles,
 } from "lucide-react"
 
+import type { RefObject } from "react"
+
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { CanvasSaveStatus } from "@/types/canvas"
@@ -25,6 +27,7 @@ interface WorkspaceNavbarProps {
   onOpenShare: () => void
   onOpenTemplates: () => void
   saveStatus: CanvasSaveStatus
+  aiTriggerRef: RefObject<HTMLButtonElement | null>
 }
 
 const SAVE_STATUS_CONFIG: Record<
@@ -63,6 +66,7 @@ export function WorkspaceNavbar({
   onOpenShare,
   onOpenTemplates,
   saveStatus,
+  aiTriggerRef,
 }: WorkspaceNavbarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-surface-border-subtle bg-surface px-3">
@@ -105,6 +109,7 @@ export function WorkspaceNavbar({
           Share
         </Button>
         <Button
+          ref={aiTriggerRef}
           size="sm"
           onClick={onToggleAiSidebar}
           aria-pressed={isAiSidebarOpen}

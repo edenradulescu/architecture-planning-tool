@@ -1,12 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  ClientSideSuspense,
-  LiveblocksProvider,
-  RoomProvider,
-  useErrorListener,
-} from "@liveblocks/react/suspense"
+import { ClientSideSuspense, useErrorListener } from "@liveblocks/react/suspense"
 import { ErrorBoundary } from "react-error-boundary"
 
 import { Canvas } from "@/components/editor/canvas"
@@ -53,6 +48,10 @@ function RoomConnectionGuard({ children }: { children: React.ReactNode }) {
   return children
 }
 
+// The LiveblocksProvider/RoomProvider connection itself lives one level up,
+// in WorkspaceShell — AiSidebar needs to share the same room connection (for
+// the AI status feed and presence) as a sibling of this component, and a
+// RoomProvider can only be established once per room, above every consumer.
 export function CanvasRoom({
   roomId,
   isTemplatesModalOpen,
@@ -60,24 +59,17 @@ export function CanvasRoom({
   onSaveStatusChange,
 }: CanvasRoomProps) {
   return (
-    <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
-      <RoomProvider
-        id={roomId}
-        initialPresence={{ cursor: null, thinking: false }}
-      >
-        <RoomConnectionGuard>
-          <ErrorBoundary fallback={<CanvasConnectionError />}>
-            <ClientSideSuspense fallback={<CanvasLoading />}>
-              <Canvas
-                roomId={roomId}
-                isTemplatesModalOpen={isTemplatesModalOpen}
-                onTemplatesModalOpenChange={onTemplatesModalOpenChange}
-                onSaveStatusChange={onSaveStatusChange}
-              />
-            </ClientSideSuspense>
-          </ErrorBoundary>
-        </RoomConnectionGuard>
-      </RoomProvider>
-    </LiveblocksProvider>
+    <RoomConnectionGuard>
+      <ErrorBoundary fallback={<CanvasConnectionError />}>
+        <ClientSideSuspense fallback={<CanvasLoading />}>
+          <Canvas
+            roomId={roomId}
+            isTemplatesModalOpen={isTemplatesModalOpen}
+            onTemplatesModalOpenChange={onTemplatesModalOpenChange}
+            onSaveStatusChange={onSaveStatusChange}
+          />
+        </ClientSideSuspense>
+      </ErrorBoundary>
+    </RoomConnectionGuard>
   )
 }

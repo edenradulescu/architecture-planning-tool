@@ -3,6 +3,7 @@
 import { useUser } from "@clerk/nextjs"
 import { useOthers } from "@liveblocks/react/suspense"
 import { useReactFlow, useViewport } from "@xyflow/react"
+import { Loader2 } from "lucide-react"
 
 function CursorPointer({ color }: { color: string }) {
   return (
@@ -33,6 +34,7 @@ export function PresenceCursors() {
     .map((other) => ({
       connectionId: other.connectionId,
       name: other.info?.name ?? "Guest",
+      thinking: other.presence.thinking,
       color: other.info?.color ?? "#f8fafc",
       screen: flowToScreenPosition(other.presence.cursor as { x: number; y: number }),
     }))
@@ -47,9 +49,10 @@ export function PresenceCursors() {
         >
           <CursorPointer color={cursor.color} />
           <span
-            className="rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap text-page"
+            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap text-page"
             style={{ backgroundColor: cursor.color }}
           >
+            {cursor.thinking && <Loader2 className="h-3 w-3 animate-spin" />}
             {cursor.name}
           </span>
         </div>

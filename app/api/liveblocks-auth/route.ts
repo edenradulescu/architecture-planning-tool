@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { getCursorColor, getLiveblocksClient } from "@/lib/liveblocks"
+import { ensureChatFeedExists, getCursorColor, getLiveblocksClient } from "@/lib/liveblocks"
 import { checkProjectAccess, getCurrentIdentity } from "@/lib/project-access"
 
 export async function POST(request: Request) {
@@ -23,6 +23,7 @@ export async function POST(request: Request) {
   const liveblocks = getLiveblocksClient()
 
   await liveblocks.getOrCreateRoom(roomId, { defaultAccesses: [] })
+  await ensureChatFeedExists(liveblocks, roomId)
 
   const session = liveblocks.prepareSession(identity.userId, {
     userInfo: {

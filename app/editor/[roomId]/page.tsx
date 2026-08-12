@@ -5,6 +5,7 @@ import { WorkspaceShell } from "@/components/editor/workspace-shell"
 import { getCollaborators } from "@/lib/collaborators"
 import { checkProjectAccess, getCurrentIdentity } from "@/lib/project-access"
 import { getOwnedProjects, getSharedProjects } from "@/lib/projects"
+import { getProjectSpecs } from "@/lib/specs"
 
 export default async function WorkspacePage({
   params,
@@ -21,10 +22,11 @@ export default async function WorkspacePage({
   )
   if (!project) return <AccessDenied />
 
-  const [ownedProjects, sharedProjects, collaborators] = await Promise.all([
+  const [ownedProjects, sharedProjects, collaborators, specs] = await Promise.all([
     getOwnedProjects(identity.userId),
     getSharedProjects(identity.email),
     getCollaborators(roomId),
+    getProjectSpecs(roomId),
   ])
 
   return (
@@ -35,6 +37,7 @@ export default async function WorkspacePage({
       sharedProjects={sharedProjects}
       isOwner={project.ownerId === identity.userId}
       collaborators={collaborators}
+      specs={specs}
     />
   )
 }
